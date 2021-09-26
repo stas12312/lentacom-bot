@@ -1,0 +1,38 @@
+version: "3"
+
+services:
+  bot:
+    build: ./src
+    environment:
+      - PG_USER=${PG_USER}
+      - PG_PASSWORD=${PG_PASSWORD}
+      - PG_DB=${PG_DB}
+      - PG_HOST=${PG_HOST}
+      - TG_TOKEN=${TG_TOKEN}
+      - TG_ADMIN_ID=${TG_ADMIN_ID}
+      - TG_USE_REDIS=${TG_USE_REDIS}
+      - REDIS_HOST=${REDIS_HOST}
+    depends_on:
+      - db
+      - redis
+  redis:
+    image: redis:6.2-alpine
+  db:
+    image: postgres:13.1
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "postgres" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    ports:
+    - 127.0.0.1:5432:5432
+    environment:
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DB=${PG_DB}
+    volumes:
+      - pg_data/:/var/lib/postgresql/data
+
+volumes:
+  pg_data:

@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "lentacombot"
+version = "0.1.0"
+description = ""
+authors = ["Stanislav Rush <911rush@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+aiogram = "^2.15"
+aioredis = "^2.0.0"
+pydantic = "^1.8.2"
+asyncpg = "^0.24.0"
+pyzbar = "^0.1.8"
+Pillow = "^8.3.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
