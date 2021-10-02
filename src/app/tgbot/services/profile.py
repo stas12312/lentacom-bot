@@ -3,8 +3,8 @@ from typing import Optional
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from lenta.client import LentaClient
-from lenta.models import City, Store
-from tgbot.callbacks.profile import city_cb, store_cb
+from lenta.models import City, Store, BaseSku
+from tgbot.callbacks.profile import city_cb, store_cb, add_sku_cb
 from tgbot.services.repository import Repo
 
 
@@ -67,3 +67,17 @@ async def get_store_for_user(lenta_client: LentaClient, repo: Repo, user_id: int
 
 async def save_store_for_user(repo: Repo, user_id: int, store_id: int) -> None:
     await repo.set_store_to_user(store_id, user_id)
+
+
+def get_add_sku_keyboard(sku_id: str) -> InlineKeyboardMarkup:
+    """Получение клавиатуры для добавление товара"""
+    return InlineKeyboardMarkup().add(
+        InlineKeyboardButton("Добавить товар", callback_data=add_sku_cb.new(sku_id))
+    )
+
+
+async def get_user_skus(user_id: int, repo: Repo, lenta_client: LentaClient) -> list[BaseSku]:
+    """Получение информации о товарах пользователя"""
+    sku_ids = await repo.get_user_sku_ids(user_id)
+    store_id = await repo.get_user_store_id(user_id)
+    return await lenta_client.get_store_skus_by_ids(store_id, sku_ids)

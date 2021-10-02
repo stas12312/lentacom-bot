@@ -1,20 +1,21 @@
-import logging
 from io import BytesIO
 
 import aiogram.utils.markdown as md
 from PIL import Image
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
-from aiogram.types import Message, CallbackQuery, ContentType
+from aiogram.types import Message, CallbackQuery, ContentType, InlineKeyboardMarkup
 from pyzbar.pyzbar import decode
 
 from lenta.client import LentaClient
-from tgbot.callbacks.profile import city_cb, store_cb
-from tgbot.keyboards.buttons import ADD_STORE, MY_STORE
+from tgbot.callbacks.profile import city_cb, store_cb, add_sku_cb
+from tgbot.keyboards.buttons import ADD_STORE, MY_STORE, MY_SKUS
 from tgbot.keyboards.menu import MAIN_MENU
 from tgbot.models.states import AddStoreForm
+from tgbot.services import messages
 from tgbot.services.profile import (get_inline_keyboard_for_cities, get_inline_keyboard_for_city_stores,
-                                    get_store_for_user, save_store_for_user)
+                                    get_store_for_user, save_store_for_user, get_add_sku_keyboard,
+                                    get_user_skus)
 from tgbot.services.repository import Repo
 
 
@@ -42,6 +43,14 @@ async def choice_city(query: CallbackQuery, repo: Repo, lenta: LentaClient,
 
     store_keyboard = await get_inline_keyboard_for_city_stores(lenta, city_id)
     await query.message.edit_text("Выберите магазин", reply_markup=store_keyboard)
+
+
+async def add_sku(query: CallbackQuery, repo: Repo, callback_data: dict[str, str]):
+    """Добавление товара пользователю"""
+    sku_id = callback_data["sku_code"]
+    await repo.add_sku_to_user(query.from_user.id, sku_id)
+    await query.answer("Товар добавлен")
+    await query.message.edit_reply_markup(InlineKeyboardMarkup())
 
 
 async def choice_store(query: CallbackQuery, lenta: LentaClient, repo: Repo,
@@ -78,11 +87,7 @@ async def show_user_store(msg: Message, repo: Repo, lenta: LentaClient):
         await msg.answer("У вас не выбран магазин")
         return
 
-    await msg.answer(
-        md.text(f"Ваш магазин: {md.escape_md(store.name)} в {md.escape_md(store.city_name)}\n"
-                f"Расположен по адресу: {md.escape_md(store.address)}\n"
-                f"Время работы: {store.opens_at}\-{store.closes_at}")
-    )
+    await msg.answer(messages.get_store_info_message(store))
 
 
 async def show_sku_info_by_photo(msg: Message, lenta: LentaClient, repo: Repo):
@@ -109,19 +114,23 @@ async def show_sku_info_by_photo(msg: Message, lenta: LentaClient, repo: Repo):
         await msg.answer("Товар не найден")
         return
 
-    price_postfix = "кг." if sku.is_weight_product else "шт."
-    price = sku.discount_price if sku.discount_price else sku.regular_price
-    discount = round(sku.regular_price - sku.discount_price, 2) if sku.discount_price else "Отсутствует"
-    await msg.answer_photo(sku.image.medium,
-                           caption=f"[{barcode.data.decode()}]\n"
-                                   f"Товар найден : {md.escape_md(sku.title)}\n"
-                                   f"Цена: {md.escape_md(price)} за {md.escape_md(price_postfix)}\n"
-                                   f"Скидка: {md.escape_md(discount)}")
+    sku_message_info = messages.get_sku_info_message(sku, barcode.data.decode())
+    await msg.answer_photo(sku.image.medium, caption=sku_message_info,
+                           reply_markup=get_add_sku_keyboard(sku.code))
+
+
+async def show_user_skus(msg: Message, lenta: LentaClient, repo: Repo):
+    """Получение товаров пользователя"""
+    skus = await get_user_skus(msg.from_user.id, repo, lenta)
+    skus_info_message = messages.get_sku_list_message(skus)
+    await msg.answer(skus_info_message)
 
 
 def register_profile(db: Dispatcher):
     db.register_message_handler(start_select_city, text=ADD_STORE)
     db.register_message_handler(show_user_store, text=MY_STORE)
     db.register_message_handler(show_sku_info_by_photo, content_types=ContentType.PHOTO)
+    db.register_message_handler(show_user_skus, text=MY_SKUS)
     db.register_callback_query_handler(choice_city, city_cb.filter(), state=AddStoreForm.city_id)
     db.register_callback_query_handler(choice_store, store_cb.filter(), state=AddStoreForm.store_id)
+    db.register_callback_query_handler(add_sku, add_sku_cb.filter(), state="*")
