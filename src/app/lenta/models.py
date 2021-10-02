@@ -78,7 +78,7 @@ class BaseSku(BaseModel):
     promo_types: Optional[str] = Field(alias="promoTypes")
     validity_start_date: Optional[datetime] = Field(alias="validityStartDate")
     validity_end_date: Optional[datetime] = Field(alias="validityStartDate")
-    image: Image
+    image: Optional[Image] = None
     images: list[Image]
     stamps_price: Optional[str] = Field(alias="stampsPrice")
     web_url: HttpUrl = Field(alias="webUrl")
@@ -98,5 +98,3 @@ class CommonSku(BaseSku):
     average_rating: float = Field(alias="averageRating")
 
     promo_precent: int = Field(alias="promoPercent")
-
-
