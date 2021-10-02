@@ -80,13 +80,13 @@ class LentaClient:
             "searchValue": search_value,
         }
         result = await self.make_request(f"/v1/stores/{store_id}/skus", "POST", data=payload)
-        return [models.CommonSku(**skus) for skus in result["skus"]]
+        return [models.CommonSku(**sku) for sku in result["skus"]]
 
     async def get_store(self, store_id: str) -> models.Store:
         """
         Получение информации о магазине
         :param store_id: Идентификатор магазина
-        :return:
+        :return: Магазин
         """
 
         result = await self.make_request(f"/v1/stores/{store_id}")
@@ -97,10 +97,24 @@ class LentaClient:
         Получение информации о товаре по коду
         :param store_id:
         :param barcode:
-        :return:
+        :return: Товар
         """
 
         result = await self.make_request(f"/v1/stores/{store_id}/skus", params={
             "barcode": barcode,
         })
         return models.BaseSku(**result)
+
+    async def get_store_skus_by_ids(self, store_id: str, sku_ids: list[int]) -> list[models.BaseSku]:
+        """
+        Получение товаров магазина по иденификаторам товаров
+        :param store_id: Идетификатор магазина
+        :param sku_ids: Идентификаторы товаров
+        :return: Список товаров
+        """
+        payload = {
+            "skuCodes": sku_ids
+        }
+        result = await self.make_request(f"/v1/stores/{store_id}/skuslist", "POST", data=payload)
+        return [models.BaseSku(**sku) for sku in result]
+
