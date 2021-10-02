@@ -42,6 +42,11 @@ class Repo:
         await self.conn.execute("INSERT INTO user_skus (user_id, sku_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
                                 user_id, sku_id)
 
+    async def delete_user_sku(self, user_id: int, sku_id: str) -> None:
+        """Удаление товара пользователя"""
+        await self.conn.execute("DELETE FROM user_skus WHERE user_id = $1 AND sku_id = $2",
+                                user_id, sku_id)
+
     async def get_user_sku_ids(self, user_id: int) -> list[int]:
         """Получение идентификаторов товаров"""
         rows = await self.conn.fetch(

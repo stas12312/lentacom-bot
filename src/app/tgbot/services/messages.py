@@ -18,11 +18,12 @@ def get_store_info_message(store: Store) -> str:
                    sep="")
 
 
-def get_sku_info_message(sku: BaseSku, barcode: Optional[str] = None) -> str:
+def get_sku_info_message(sku: BaseSku, barcode: Optional[str] = None, add_detail_command: bool = False) -> str:
     """
     Формирование текста для информации о товаре
     :param sku: Товар
     :param barcode: Значение штрих-кода
+    :param add_detail_command: Добавление команды для перехода к описанию продукта
     :return: Текстовая информация о товаре
     """
     discount = round(sku.regular_price - sku.discount_price, 2) if sku.discount_price else None
@@ -54,13 +55,17 @@ def get_sku_info_message(sku: BaseSku, barcode: Optional[str] = None) -> str:
         msg_parts.extend([
             md.text("🎁 Скидка:", md.escape_md(discount))
         ])
+    if add_detail_command:
+        msg_parts.extend([
+            md.escape_md("Перейти к товару:", f"/detail_{sku.code}")
+        ])
 
     return md.text(*msg_parts, sep="\n")
 
 
-def get_sku_list_message(skus: list[BaseSku]) -> str:
+def get_sku_list_message(title: str, skus: list[BaseSku], add_detail_command: bool = False) -> str:
     """Формирование сообщения для списка товаров"""
-    msg_parts = ["🗒 Список добавленных товаров"]
-    msg_parts.extend([get_sku_info_message(sku) for sku in skus])
+    msg_parts = [title]
+    msg_parts.extend([get_sku_info_message(sku, add_detail_command=add_detail_command) for sku in skus])
 
     return md.text(*msg_parts, sep="\n\n")

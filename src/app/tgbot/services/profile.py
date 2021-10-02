@@ -81,3 +81,15 @@ async def get_user_skus(user_id: int, repo: Repo, lenta_client: LentaClient) -> 
     sku_ids = await repo.get_user_sku_ids(user_id)
     store_id = await repo.get_user_store_id(user_id)
     return await lenta_client.get_store_skus_by_ids(store_id, sku_ids) if sku_ids else []
+
+
+async def get_user_sku(user_id: int, sku_code: str, repo: Repo, lenta_client: LentaClient) -> BaseSku:
+    store_id = await repo.get_user_store_id(user_id)
+    return await lenta_client.get_sku(store_id, sku_code)
+
+
+async def search_skus_in_user_store(user_id: int, sku_name: str,
+                                    repo: Repo, lenta_client: LentaClient) -> list[BaseSku]:
+    """Получение товаров по совпадению в названии"""
+    store_id = await repo.get_user_store_id(user_id)
+    return await lenta_client.search_skus_in_store(store_id, sku_name)
