@@ -80,4 +80,4 @@ async def get_user_skus(user_id: int, repo: Repo, lenta_client: LentaClient) -> 
     """Получение информации о товарах пользователя"""
     sku_ids = await repo.get_user_sku_ids(user_id)
     store_id = await repo.get_user_store_id(user_id)
-    return await lenta_client.get_store_skus_by_ids(store_id, sku_ids)
+    return await lenta_client.get_store_skus_by_ids(store_id, sku_ids) if sku_ids else []
