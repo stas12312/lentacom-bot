@@ -69,7 +69,7 @@ class BaseSku(BaseModel):
     price_by_promocode: Optional[float] = Field(alias="priceByProcomode")
     code: str
     title: str
-    brand: str
+    brand: Optional[str]
     sub_title: str = Field(alias="subTitle")
     descitpion: Optional[str]
     regular_price: float = Field(alias="regularPrice")
@@ -83,7 +83,7 @@ class BaseSku(BaseModel):
     stamps_price: Optional[str] = Field(alias="stampsPrice")
     web_url: HttpUrl = Field(alias="webUrl")
     order_limit: Optional[int] = Field(alias="orderLimit")
-    order_steps: Optional[str] = Field(alias="orderSteps")
+    order_steps: Optional[list[float]] = Field(alias="orderSteps")
     sku_weight: float = Field(alias="skuWeight")
     is_available_for_order: bool = Field(alias="isAvailableForOrder")
     is_available_for_delivery: bool = Field(alias="isAvailableForDelivery")
