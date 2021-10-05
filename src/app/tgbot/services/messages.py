@@ -32,7 +32,7 @@ def get_sku_info_message(sku: BaseSku, barcode: Optional[str] = None, add_detail
     price = sku.discount_price if sku.discount_price else sku.regular_price
     postfix_price = "кг." if sku.is_weight_product else "шт."
     price_str = md.text(md.escape_md(sku.discount_price), md.strikethrough(sku.regular_price)) \
-        if sku.discount_price else sku.regular_price
+        if sku.discount_price else md.escape_md(sku.regular_price)
 
     if barcode:
         msg_parts.append(md.escape_md("🎹 Штрих-код:", md.bold(barcode)))
