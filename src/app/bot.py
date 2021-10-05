@@ -49,8 +49,8 @@ async def main():
 
     dp.middleware.setup(DbMiddleware(pool))
     dp.middleware.setup(LentaMiddleware(lenta_client))
-    register_profile(dp)
     register_user(dp)
+    register_profile(dp)
 
     async with pool.acquire() as conn:
         await create_db(conn)
