@@ -69,15 +69,31 @@ class LentaClient:
         result = await self.make_request(f"/v1/cities/{city_id}/stores")
         return [models.Store(**store) for store in result]
 
-    async def search_skus_in_store(self, store_id: str, search_value: str) -> list[models.BaseSku]:
+    async def search_skus_in_store(
+            self, store_id: str, search_value: Optional[str] = None, limit: int = 10, offset: int = 0,
+            max_price: Optional[float] = None, min_price: Optional[float] = None, sorting: Optional[str] = None,
+            only_discounts: bool = False
+    ) -> list[models.BaseSku]:
         """
         Поиск товара в магазине
         :param store_id: Идентификатор магазина
+        :param limit: Кол-во выбираемых элементов
+        :param offset: Сдвиг выбираемых элементов
+        :param max_price: Максимальная цена
+        :param min_price: Минимальная цена
+        :param sorting: Поле сортировки
+        :param only_discounts: Только товары со скидками
         :param search_value: Название товара для поиска
         :return: Найденные товары
         """
         payload = {
             "searchValue": search_value,
+            "limit": limit,
+            "offset": offset,
+            "maxPrice": max_price,
+            "minPrice": min_price,
+            "sorting": sorting,
+            "onlyDiscounts": only_discounts,
         }
         result = await self.make_request(f"/v1/stores/{store_id}/skus", "POST", data=payload)
         return [models.BaseSku(**sku) for sku in result["skus"]]
