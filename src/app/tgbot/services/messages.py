@@ -55,6 +55,11 @@ def get_sku_info_message(sku: BaseSku, barcode: Optional[str] = None, add_detail
         msg_parts.extend([
             md.text("🎁 Скидка:", md.escape_md(discount))
         ])
+    if sku.promo_type != "None":
+        msg_parts.append(
+            md.text("📅 Дата окончания скидки:", md.escape_md(sku.validity_end_date.strftime("%d.%m.%Y")))
+        )
+
     if add_detail_command:
         msg_parts.extend([
             md.escape_md("Перейти к товару:", f"/detail_{sku.code}")
