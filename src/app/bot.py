@@ -60,7 +60,7 @@ async def main():
     try:
         logging.info(datetime.datetime.now())
         scheduler.start()
-        scheduler.add_job(get_discounts_for_skus, "cron", minute=42, hour=15, second=0, args=(pool, lenta_client, bot))
+        scheduler.add_job(get_discounts_for_skus, "cron", minute=0, hour=0, second=0, args=(pool, lenta_client, bot))
         await dp.start_polling()
     finally:
         await dp.storage.close()
