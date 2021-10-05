@@ -12,6 +12,7 @@ pydantic = "^1.8.2"
 asyncpg = "^0.24.0"
 pyzbar = "^0.1.8"
 Pillow = "^8.3.2"
+APScheduler = "^3.8.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
