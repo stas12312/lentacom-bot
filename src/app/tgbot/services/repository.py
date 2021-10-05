@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 import asyncpg
@@ -55,3 +56,25 @@ class Repo:
         )
 
         return [row["sku_id"] for row in rows]
+
+    async def get_store_skus(self) -> list[asyncpg.Record]:
+        """Получение информации о всех товарах в бд"""
+        rows = await self.conn.fetch(
+            "SELECT DISTINCT st.store_id AS store_id, sk.sku_id AS sku_id"
+            " FROM users AS u "
+            "JOIN user_store AS st on u.id = st.user_id "
+            "JOIN user_skus AS sk on u.id = sk.user_id "
+        )
+        logging.info(rows)
+        return rows
+
+    async def get_user_store_skus(self) -> list[asyncpg.Record]:
+        """Получение информации о магазине и товарах пользователей"""
+        rows = await self.conn.fetch(
+            "SELECT u.id AS user_id, st.store_id AS store_id, sk.sku_id AS sku_id "
+            "FROM users AS u "
+            "JOIN user_store AS st on u.id = st.user_id "
+            "JOIN user_skus AS sk on u.id = sk.user_id"
+        )
+
+        return rows

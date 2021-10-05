@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import logging
 
 import asyncpg
@@ -6,6 +7,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage
 from aiogram.types import BotCommand, ParseMode
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from lenta.client import LentaClient
 from tgbot.config import load_config, COMMANDS
@@ -14,6 +16,7 @@ from tgbot.handlers.user import register_user
 from tgbot.middlewares.db import DbMiddleware
 from tgbot.middlewares.lenta import LentaMiddleware
 from tgbot.services.db import create_db
+from tgbot.services.lenta import get_discounts_for_skus
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +44,11 @@ async def main():
 
     bot = Bot(token=config.TG_TOKEN, parse_mode=ParseMode.MARKDOWN_V2)
     dp = Dispatcher(bot, storage=storage)
+    lenta_client = LentaClient()
+    scheduler = AsyncIOScheduler()
+
     dp.middleware.setup(DbMiddleware(pool))
-    dp.middleware.setup(LentaMiddleware(LentaClient()))
+    dp.middleware.setup(LentaMiddleware(lenta_client))
     register_profile(dp)
     register_user(dp)
 
@@ -52,6 +58,9 @@ async def main():
     await bot.set_my_commands([BotCommand(*cmd) for cmd in COMMANDS])
     # start
     try:
+        logging.info(datetime.datetime.now())
+        scheduler.start()
+        scheduler.add_job(get_discounts_for_skus, "cron", minute=42, hour=15, second=0, args=(pool, lenta_client, bot))
         await dp.start_polling()
     finally:
         await dp.storage.close()
