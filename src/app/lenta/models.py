@@ -75,9 +75,9 @@ class BaseSku(BaseModel):
     regular_price: float = Field(alias="regularPrice")
     discount_price: Optional[float] = Field(alias="discountPrice")
     offer_descitpion: Optional[str] = Field(alias="offerDescription")
-    promo_types: Optional[str] = Field(alias="promoTypes")
+    promo_type: Optional[str] = Field(alias="promoType")
     validity_start_date: Optional[datetime] = Field(alias="validityStartDate")
-    validity_end_date: Optional[datetime] = Field(alias="validityStartDate")
+    validity_end_date: Optional[datetime] = Field(alias="validityEndDate")
     image: Optional[Image] = None
     images: list[Image]
     stamps_price: Optional[str] = Field(alias="stampsPrice")

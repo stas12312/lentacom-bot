@@ -105,7 +105,7 @@ class LentaClient:
         })
         return models.BaseSku(**result)
 
-    async def get_store_skus_by_ids(self, store_id: str, sku_ids: list[int]) -> list[models.BaseSku]:
+    async def get_store_skus_by_ids(self, store_id: str, sku_ids: list[str]) -> list[models.BaseSku]:
         """
         Получение товаров магазина по иденификаторам товаров
         :param store_id: Идетификатор магазина
