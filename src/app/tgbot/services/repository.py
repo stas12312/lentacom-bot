@@ -9,11 +9,12 @@ class Repo:
     def __init__(self, conn: asyncpg.Connection):
         self.conn = conn
 
-    async def add_user(self, user_id) -> None:
+    async def add_user(self, user_id: int, first_name: str, last_name: str) -> None:
         """Сохранение пользователя"""
         await self.conn.execute(
-            "INSERT INTO users (id) VALUES ($1) ON CONFLICT DO NOTHING",
-            user_id,
+            "INSERT INTO users (id, first_name, last_name) VALUES ($1, $2, $3) ON CONFLICT (id) "
+            "DO UPDATE SET first_name = $2, last_name = $3",
+            user_id, first_name, last_name
         )
         return
 
@@ -48,7 +49,7 @@ class Repo:
         await self.conn.execute("DELETE FROM user_skus WHERE user_id = $1 AND sku_id = $2",
                                 user_id, sku_id)
 
-    async def get_user_sku_ids(self, user_id: int) -> list[int]:
+    async def get_user_sku_ids(self, user_id: int) -> list[str]:
         """Получение идентификаторов товаров"""
         rows = await self.conn.fetch(
             "SELECT sku_id FROM user_skus WHERE user_id=$1",

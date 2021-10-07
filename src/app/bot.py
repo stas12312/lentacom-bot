@@ -15,7 +15,6 @@ from tgbot.handlers.profile import register_profile
 from tgbot.handlers.user import register_user
 from tgbot.middlewares.db import DbMiddleware
 from tgbot.middlewares.lenta import LentaMiddleware
-from tgbot.services.db import create_db
 from tgbot.services.lenta import get_discounts_for_skus
 
 logger = logging.getLogger(__name__)
@@ -51,9 +50,6 @@ async def main():
     dp.middleware.setup(LentaMiddleware(lenta_client))
     register_user(dp)
     register_profile(dp)
-
-    async with pool.acquire() as conn:
-        await create_db(conn)
 
     await bot.set_my_commands([BotCommand(*cmd) for cmd in COMMANDS])
     # start

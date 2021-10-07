@@ -7,9 +7,10 @@ from tgbot.keyboards.menu import MAIN_MENU
 from tgbot.services.repository import Repo
 
 
-async def user_start(m: Message, repo: Repo):
-    await repo.add_user(m.from_user.id)
-    await m.reply("Добро пожаловать 1", reply_markup=MAIN_MENU)
+async def user_start(msg: Message, repo: Repo):
+    user = msg.from_user
+    await repo.add_user(user.id, user.first_name, user.last_name)
+    await msg.answer("Для начала работы выберите магазин", reply_markup=MAIN_MENU)
 
 
 async def cancel(msg: Message, state: FSMContext):
