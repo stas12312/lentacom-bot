@@ -90,7 +90,7 @@ async def send_messages(bot: Bot, user_skus: list[tuple[int, list[BaseSku]]]) ->
     for user_id, skus in user_skus:
         try:
             message = "\n\n".join([
-                "🎁 Сегодняшние скидки",
+                "🎁 Скидки на сегодня" if skus else "😢 На ваши товары сегодня скидок нет",
                 *[get_sku_info_message(sku) for sku in skus]
             ])
             await bot.send_message(user_id, message)
