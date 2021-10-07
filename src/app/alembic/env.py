@@ -80,7 +80,6 @@ async def run_migrations_online():
             future=True,
         )
     )
-    print(config.get_section(config.config_ini_section))
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
 
