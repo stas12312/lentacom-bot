@@ -15,7 +15,10 @@ RUN poetry config virtualenvs.create false && poetry update && poetry install
 
 # Копирование исходного кода
 COPY ./app /app
+
+# Копирование скрипта подгтовки запуска приложения
 COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["python", "bot.py"]
