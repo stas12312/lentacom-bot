@@ -12,10 +12,11 @@ def get_store_info_message(store: Store) -> str:
     :param store: Магазин
     :return: Текстовая информация о магазине
     """
-    return md.text("🏢 Город:", md.escape_md(store.city_name), "\n",
-                   "📍 Адрес:", md.escape_md(store.address), "\n",
-                   "🕓 Время работы:", md.text(store.opens_at), md.escape_md("-"), md.text(store.closes_at),
-                   sep="")
+    return md.text(
+        md.text("🏢 Город:", md.escape_md(store.city_name)),
+        md.text("📍 Адрес:", md.escape_md(store.address)),
+        md.text("🕓 Время работы:", md.text(store.opens_at, md.escape_md("-"), md.text(store.closes_at), sep="")),
+        sep="\n")
 
 
 def get_sku_info_message(sku: BaseSku, barcode: Optional[str] = None, add_detail_command: bool = False) -> str:

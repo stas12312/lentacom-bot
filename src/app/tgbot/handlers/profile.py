@@ -95,7 +95,7 @@ async def show_user_store(msg: Message, repo: Repo, lenta: LentaClient):
     if not store:
         await msg.answer("У вас не выбран магазин")
         return
-
+    await msg.answer_location(latitude=store.lat, longitude=store.long)
     await msg.answer(messages.get_store_info_message(store))
 
 
