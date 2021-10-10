@@ -27,7 +27,7 @@ async def start_select_city(msg: Message, lenta: LentaClient, repo: Repo, state:
     await AddStoreForm.select_city.set()
 
     # Сохраняем ID сообщения в хранилище для возможности его удаления вне inline клавиатуры
-    await msg.answer("Выбор города", reply_markup=SEND_LOCATION)
+    await msg.answer("Выбор магазина", reply_markup=SEND_LOCATION)
     choice_city_msg = await msg.answer("Список доступных городов", reply_markup=city_keyboard)
     await state.update_data(message_id=choice_city_msg.message_id)
 
@@ -37,7 +37,6 @@ async def choice_store_by_location(msg: Message, repo: Repo, lenta: LentaClient,
     await msg.bot.delete_message(msg.from_user.id, data["message_id"])
     await state.finish()
 
-    await msg.answer("Поиск магазина")
     store = await profile.get_store_by_coodrinites(lenta, msg.location.latitude, msg.location.longitude)
     await profile.save_store_for_user(repo, msg.from_user.id, store.id)
     await msg.answer_location(latitude=store.lat, longitude=store.long)
@@ -77,7 +76,7 @@ async def choice_store(query: CallbackQuery, lenta: LentaClient, repo: Repo,
         data["store_id"] = callback_data["store_id"]
         await profile.save_store_for_user(repo, user_id, data["store_id"])
         await query.message.answer(
-            md.text("Магазин добавлен"),
+            md.text("Магазин выбран"),
             reply_markup=MAIN_MENU,
         )
 
