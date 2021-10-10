@@ -58,6 +58,36 @@ class BaseCategory(BaseModel):
     name: str
 
 
+class DetailCategory(BaseCategory):
+    sku_count: int = Field(alias="skuCount")
+    sku_discounts_count: int = Field(alias="skuDiscountCount")
+    show_lentochka_banner: bool = Field(alias="showLentochkaBanner")
+    image: Optional[Image]
+    url: str
+
+
+class ChildCategory(DetailCategory):
+    pass
+
+
+class Category(DetailCategory):
+    subcategories: list[ChildCategory]
+
+
+class RootCategory(DetailCategory):
+    categories: list[Category]
+
+
+class LentochkaPromotion(BaseModel):
+    banner: Optional[str]
+    banner_url: Optional[str] = Field(alias="bannerUrl")
+
+
+class Catalog(BaseModel):
+    catalog_groups: list[RootCategory] = Field(alias="catalogGroups")
+    lentochka_promotion: LentochkaPromotion = Field(alias="lentochkaPromotion")
+
+
 class Categories(BaseModel):
     group: BaseCategory
     category: BaseCategory

@@ -144,3 +144,13 @@ class LentaClient:
 
         result = await self.make_request(f"/v1/stores/{store_id}/skus/{code}")
         return models.BaseSku(**result)
+
+    async def get_catalog(self, store_id: str) -> models.Catalog:
+        """
+        Получение каталога для магазина
+        :param store_id: Идентификатор магазина
+        :return: Каталог магазина
+        """
+
+        result = await self.make_request(f"/v2/stores/{store_id}/catalog")
+        return models.Catalog(**result)
