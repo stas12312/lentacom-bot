@@ -22,3 +22,4 @@ async def cancel(msg: Message, state: FSMContext):
 def register_user(dp: Dispatcher):
     dp.register_message_handler(user_start, commands=["start"], state="*")
     dp.register_message_handler(cancel, text=buttons.CANCEL, state="*")
+    dp.register_message_handler(cancel, commands=["cancel"], state="*")

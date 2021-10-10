@@ -6,6 +6,7 @@ from lenta.client import LentaClient
 from lenta.models import City, Store, BaseSku
 from tgbot.callbacks.profile import city_cb, store_cb, add_sku_cb
 from tgbot.services.repository import Repo
+from tgbot.services.utils import distance_between_points
 
 
 async def get_city_by_name(city_name: str, lenta_client: LentaClient) -> Optional[City]:
@@ -93,3 +94,11 @@ async def search_skus_in_user_store(user_id: int, sku_name: str,
     """Получение товаров по совпадению в названии"""
     store_id = await repo.get_user_store_id(user_id)
     return await lenta_client.search_skus_in_store(store_id, sku_name)
+
+
+async def get_store_by_coodrinites(lenta_client: LentaClient, latitude: float, longitude: float) -> Store:
+    """Поиск ближайшего магазина Ленты"""
+    stores = await lenta_client.get_stores()
+
+    stores = sorted(stores, key=lambda s: distance_between_points(latitude, longitude, s.lat, s.long))
+    return stores[0]

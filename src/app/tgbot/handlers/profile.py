@@ -11,21 +11,41 @@ from pyzbar.pyzbar import decode
 from lenta.client import LentaClient
 from tgbot.callbacks.profile import city_cb, store_cb, add_sku_cb, delete_sku_cb
 from tgbot.keyboards import buttons
-from tgbot.keyboards.menu import MAIN_MENU, CANCEL_MENU
+from tgbot.keyboards.menu import MAIN_MENU, CANCEL_MENU, SEND_LOCATION
 from tgbot.keyboards.sku import get_sku_keyboard
 from tgbot.models.states import AddStoreForm, SearchSku
 from tgbot.services import messages, profile
 from tgbot.services.repository import Repo
 
 
-async def start_select_city(msg: Message, lenta: LentaClient, repo: Repo):
+async def start_select_city(msg: Message, lenta: LentaClient, repo: Repo, state: FSMContext):
     """
     Начало процесса выбора магазина
     Отображение доступных городов
     """
     city_keyboard = await profile.get_inline_keyboard_for_cities(lenta)
-    await msg.answer("Список доступных городов", reply_markup=city_keyboard)
-    await AddStoreForm.city_id.set()
+    await AddStoreForm.select_city.set()
+
+    # Сохраняем ID сообщения в хранилище для возможности его удаления вне inline клавиатуры
+    await msg.answer("Выбор города", reply_markup=SEND_LOCATION)
+    choice_city_msg = await msg.answer("Список доступных городов", reply_markup=city_keyboard)
+    await state.update_data(message_id=choice_city_msg.message_id)
+
+
+async def choice_store_by_location(msg: Message, repo: Repo, lenta: LentaClient, state: FSMContext):
+    data = await state.get_data()
+    await msg.bot.delete_message(msg.from_user.id, data["message_id"])
+    await state.finish()
+
+    await msg.answer("Поиск магазина")
+
+    store = await profile.get_store_by_coodrinites(lenta, msg.location.latitude, msg.location.longitude)
+    await msg.answer_location(latitude=store.lat, longitude=store.long)
+    await msg.answer(
+        f"Выбран ближайший магазин:\n"
+        f"{messages.get_store_info_message(store)}",
+        reply_markup=MAIN_MENU,
+    )
 
 
 async def choice_city(query: CallbackQuery, repo: Repo, lenta: LentaClient,
@@ -42,24 +62,6 @@ async def choice_city(query: CallbackQuery, repo: Repo, lenta: LentaClient,
 
     store_keyboard = await profile.get_inline_keyboard_for_city_stores(lenta, city_id)
     await query.message.edit_text("Выберите магазин", reply_markup=store_keyboard)
-
-
-async def add_sku(query: CallbackQuery, repo: Repo, callback_data: dict[str, str]):
-    """Добавление товара пользователю"""
-    sku_id = callback_data["sku_code"]
-    await repo.add_sku_to_user(query.from_user.id, sku_id)
-    await query.answer("Товар добавлен")
-    sku_keyboard = await get_sku_keyboard(query.from_user.id, sku_id, repo)
-    await query.message.edit_reply_markup(sku_keyboard)
-
-
-async def delete_sku(query: CallbackQuery, repo: Repo, callback_data: dict[str, str]):
-    """Удаление товара из списка пользователя"""
-    sku_id = callback_data["sku_code"]
-    await repo.delete_user_sku(query.from_user.id, sku_id)
-    await query.answer("Товар удалён")
-    sku_keyboard = await get_sku_keyboard(query.from_user.id, sku_id, repo)
-    await query.message.edit_reply_markup(sku_keyboard)
 
 
 async def choice_store(query: CallbackQuery, lenta: LentaClient, repo: Repo,
@@ -80,6 +82,24 @@ async def choice_store(query: CallbackQuery, lenta: LentaClient, repo: Repo,
         )
 
     await state.finish()
+
+
+async def add_sku(query: CallbackQuery, repo: Repo, callback_data: dict[str, str]):
+    """Добавление товара пользователю"""
+    sku_id = callback_data["sku_code"]
+    await repo.add_sku_to_user(query.from_user.id, sku_id)
+    await query.answer("Товар добавлен")
+    sku_keyboard = await get_sku_keyboard(query.from_user.id, sku_id, repo)
+    await query.message.edit_reply_markup(sku_keyboard)
+
+
+async def delete_sku(query: CallbackQuery, repo: Repo, callback_data: dict[str, str]):
+    """Удаление товара из списка пользователя"""
+    sku_id = callback_data["sku_code"]
+    await repo.delete_user_sku(query.from_user.id, sku_id)
+    await query.answer("Товар удалён")
+    sku_keyboard = await get_sku_keyboard(query.from_user.id, sku_id, repo)
+    await query.message.edit_reply_markup(sku_keyboard)
 
 
 async def show_user_store(msg: Message, repo: Repo, lenta: LentaClient):
@@ -168,7 +188,9 @@ def register_profile(db: Dispatcher):
     db.register_message_handler(start_search_sku, text=buttons.SEARCH_SKU)
     db.register_message_handler(show_founded_skus, state=SearchSku.select_sku)
     db.register_message_handler(show_sku_detail, Text(startswith="/detail_"))
-    db.register_callback_query_handler(choice_city, city_cb.filter(), state=AddStoreForm.city_id)
-    db.register_callback_query_handler(choice_store, store_cb.filter(), state=AddStoreForm.store_id)
+    db.register_message_handler(choice_store_by_location, content_types=ContentType.LOCATION,
+                                state=[AddStoreForm.select_city, AddStoreForm.select_store])
+    db.register_callback_query_handler(choice_city, city_cb.filter(), state=AddStoreForm.select_city)
+    db.register_callback_query_handler(choice_store, store_cb.filter(), state=AddStoreForm.select_store)
     db.register_callback_query_handler(add_sku, add_sku_cb.filter(), state="*")
     db.register_callback_query_handler(delete_sku, delete_sku_cb.filter(), state="*")

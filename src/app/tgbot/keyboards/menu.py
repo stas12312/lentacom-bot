@@ -11,3 +11,7 @@ MAIN_MENU = ReplyKeyboardMarkup([
 CANCEL_MENU = ReplyKeyboardMarkup([
     [KeyboardButton(buttons.CANCEL)],
 ], resize_keyboard=True)
+
+SEND_LOCATION = ReplyKeyboardMarkup([
+    [KeyboardButton(buttons.SEND_LOCATION, request_location=True)]
+], resize_keyboard=True)
