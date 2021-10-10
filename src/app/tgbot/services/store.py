@@ -1,9 +1,27 @@
+from typing import Optional
+
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from lenta.client import LentaClient
-from lenta.models import Store
+from lenta.models import Store, City
 from tgbot.callbacks.profile import city_cb, store_cb
 from tgbot.services.utils import distance_between_points
+
+
+async def get_city_by_name(city_name: str, lenta_client: LentaClient) -> Optional[City]:
+    """
+    Получение города по названию
+    :param city_name:
+    :param lenta_client:
+    :return:
+    """
+
+    all_cities = await lenta_client.get_cities()
+
+    for city in all_cities:
+        if city.name == city_name:
+            return city
+    return None
 
 
 async def get_inline_keyboard_for_cities(lenta_client: LentaClient) -> InlineKeyboardMarkup:

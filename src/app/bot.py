@@ -12,6 +12,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from lenta.client import LentaClient
 from tgbot.config import load_config, COMMANDS
 from tgbot.handlers.profile import register_profile
+from tgbot.handlers.sku import register_sku
 from tgbot.handlers.store import register_store
 from tgbot.handlers.user import register_user
 from tgbot.middlewares.db import DbMiddleware
@@ -29,6 +30,7 @@ def register_handlers(dp: Dispatcher) -> None:
     register_user(dp)
     register_profile(dp)
     register_store(dp)
+    register_sku(dp)
 
 
 async def main():
