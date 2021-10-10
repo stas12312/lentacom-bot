@@ -13,11 +13,11 @@ class DbMiddleware(LifetimeControllerMiddleware):
 
     async def pre_process(self, obj, data, *args):
         db = await self.pool.acquire()
-        data["db"] = db
+        data["dp"] = db
         data["repo"] = Repo(db)
 
     async def post_process(self, obj, data, *args):
         del data["repo"]
-        db = data.get("db")
+        db = data.get("dp")
         if db:
             await db.close()

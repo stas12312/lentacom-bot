@@ -4,7 +4,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from lenta.client import LentaClient
 from lenta.models import City, Store, BaseSku
-from tgbot.callbacks.profile import city_cb, store_cb, add_sku_cb
+from tgbot.callbacks.profile import add_sku_cb
 from tgbot.services.repository import Repo
 from tgbot.services.utils import distance_between_points
 
@@ -23,34 +23,6 @@ async def get_city_by_name(city_name: str, lenta_client: LentaClient) -> Optiona
         if city.name == city_name:
             return city
     return None
-
-
-async def get_inline_keyboard_for_cities(lenta_client: LentaClient) -> InlineKeyboardMarkup:
-    """
-    Получение инлайн клавиатуры для списка городов
-    :return:
-    """
-    all_cities = await lenta_client.get_cities()
-    all_cities = sorted(all_cities, key=lambda c: c.name)
-
-    return InlineKeyboardMarkup(row_width=2).add(
-        *[InlineKeyboardButton(city.name, callback_data=city_cb.new(city_id=city.id)) for city in all_cities]
-    )
-
-
-async def get_inline_keyboard_for_city_stores(lenta_client: LentaClient, city_id: str) -> InlineKeyboardMarkup:
-    """
-    Получение инлайн клавиатуры для списка магазинов
-    :param lenta_client:
-    :param city_id:
-    :return:
-    """
-    city_stores = await lenta_client.get_city_stores(city_id)
-    city_stores = sorted(city_stores, key=lambda s: s.name)
-
-    return InlineKeyboardMarkup(row_width=2).add(
-        *[InlineKeyboardButton(store.name, callback_data=store_cb.new(store_id=store.id)) for store in city_stores]
-    )
 
 
 async def get_store_for_user(lenta_client: LentaClient, repo: Repo, user_id: int) -> Optional[Store]:
@@ -93,11 +65,3 @@ async def search_skus_in_user_store(user_id: int, sku_name: str,
     return await lenta_client.search_skus_in_store(store_id, sku_name)
 
 
-async def get_store_by_coodrinites(lenta_client: LentaClient, latitude: float, longitude: float) -> Store:
-    """Поиск ближайшего магазина Ленты"""
-    cities = await lenta_client.get_cities()
-    cities = sorted(cities, key=lambda c: distance_between_points(latitude, longitude, c.lat, c.long))
-    nearest_city = cities[0]
-    city_stores = await lenta_client.get_city_stores(nearest_city.id)
-    stores = sorted(city_stores, key=lambda s: distance_between_points(latitude, longitude, s.lat, s.long))
-    return stores[0]

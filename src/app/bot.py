@@ -12,6 +12,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from lenta.client import LentaClient
 from tgbot.config import load_config, COMMANDS
 from tgbot.handlers.profile import register_profile
+from tgbot.handlers.store import register_store
 from tgbot.handlers.user import register_user
 from tgbot.middlewares.db import DbMiddleware
 from tgbot.middlewares.lenta import LentaMiddleware
@@ -24,18 +25,25 @@ def create_pool(connection_string: str, echo: bool) -> asyncpg.Pool:
     return asyncpg.create_pool(connection_string)
 
 
+def register_handlers(dp: Dispatcher) -> None:
+    register_user(dp)
+    register_profile(dp)
+    register_store(dp)
+
+
 async def main():
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     )
-    logger.error("Starting bot")
+    logger.info("Starting bot")
     config = load_config()
 
     if config.TG_USE_REDIS:
         storage = RedisStorage(host=config.REDIS_HOST)
     else:
         storage = MemoryStorage()
+
     pool: asyncpg.Pool = await create_pool(
         config.PG_CONNECTION_STRING,
         echo=False,
@@ -43,13 +51,14 @@ async def main():
 
     bot = Bot(token=config.TG_TOKEN, parse_mode=ParseMode.MARKDOWN_V2)
     dp = Dispatcher(bot, storage=storage)
+
     lenta_client = LentaClient()
     scheduler = AsyncIOScheduler()
 
+    register_handlers(dp)
+
     dp.middleware.setup(DbMiddleware(pool))
     dp.middleware.setup(LentaMiddleware(lenta_client))
-    register_user(dp)
-    register_profile(dp)
 
     await bot.set_my_commands([BotCommand(*cmd) for cmd in COMMANDS])
     # start
