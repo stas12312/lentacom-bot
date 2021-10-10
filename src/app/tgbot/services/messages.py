@@ -12,10 +12,13 @@ def get_store_info_message(store: Store) -> str:
     :param store: Магазин
     :return: Текстовая информация о магазине
     """
+    work_time = "Круглосуточно" if store.is_24_h_store \
+        else md.text(store.opens_at, md.escape_md("-"), md.text(store.closes_at), sep="")
+
     return md.text(
         md.text("🏢 Город:", md.escape_md(store.city_name)),
         md.text("📍 Адрес:", md.escape_md(store.address)),
-        md.text("🕓 Время работы:", md.text(store.opens_at, md.escape_md("-"), md.text(store.closes_at), sep="")),
+        md.text("🕓 Время работы:", work_time),
         sep="\n")
 
 
