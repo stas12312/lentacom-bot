@@ -55,18 +55,15 @@ async def get_inline_keyboard_for_city_stores(lenta_client: LentaClient, city_id
 
 async def get_store_for_user(lenta_client: LentaClient, repo: Repo, user_id: int) -> Optional[Store]:
     """
-    Получение магазинов пользователя
-    :param repo:
-    :param user_id:
-    :param lenta_client:
-    :return:
+    Получение магазина пользователя
     """
 
     store_id = await repo.get_user_store_id(user_id)
     return await lenta_client.get_store(store_id) if store_id else None
 
 
-async def save_store_for_user(repo: Repo, user_id: int, store_id: int) -> None:
+async def save_store_for_user(repo: Repo, user_id: int, store_id: str) -> None:
+    """Сохранение магазина пользователя"""
     await repo.set_store_to_user(store_id, user_id)
 
 
@@ -98,7 +95,9 @@ async def search_skus_in_user_store(user_id: int, sku_name: str,
 
 async def get_store_by_coodrinites(lenta_client: LentaClient, latitude: float, longitude: float) -> Store:
     """Поиск ближайшего магазина Ленты"""
-    stores = await lenta_client.get_stores()
-
-    stores = sorted(stores, key=lambda s: distance_between_points(latitude, longitude, s.lat, s.long))
+    cities = await lenta_client.get_cities()
+    cities = sorted(cities, key=lambda c: distance_between_points(latitude, longitude, c.lat, c.long))
+    nearest_city = cities[0]
+    city_stores = await lenta_client.get_city_stores(nearest_city.id)
+    stores = sorted(city_stores, key=lambda s: distance_between_points(latitude, longitude, s.lat, s.long))
     return stores[0]

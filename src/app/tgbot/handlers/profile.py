@@ -38,8 +38,8 @@ async def choice_store_by_location(msg: Message, repo: Repo, lenta: LentaClient,
     await state.finish()
 
     await msg.answer("Поиск магазина")
-
     store = await profile.get_store_by_coodrinites(lenta, msg.location.latitude, msg.location.longitude)
+    await profile.save_store_for_user(repo, msg.from_user.id, store.id)
     await msg.answer_location(latitude=store.lat, longitude=store.long)
     await msg.answer(
         f"Выбран ближайший магазин:\n"

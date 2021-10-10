@@ -18,7 +18,7 @@ class Repo:
         )
         return
 
-    async def set_store_to_user(self, store_id: int, user_id: int):
+    async def set_store_to_user(self, store_id: str, user_id: int):
         """Добавление магазина пользователю"""
         await self.conn.execute(
             "DELETE FROM user_store WHERE user_id=$1",
