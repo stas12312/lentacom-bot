@@ -7,6 +7,8 @@ import aiohttp
 from . import models
 
 LENTA_BASE_URL = "https://lenta.com/api"
+FAKE_USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) " \
+                  "CriOS/69.0.3497.105 Mobile/15E148 Safari/605.1"
 
 
 class LentaClient:
@@ -23,6 +25,9 @@ class LentaClient:
         return aiohttp.ClientSession(
             loop=self._main_loop,
             json_serialize=json.dumps,
+            headers={
+                "user-agent": FAKE_USER_AGENT,
+            }
         )
 
     async def make_request(self, endpoint: str,
