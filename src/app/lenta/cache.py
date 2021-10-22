@@ -42,7 +42,6 @@ class MemoryCache(BaseCache):
     def set(self, key: str, value: Union[list, dict], ttl: int) -> None:
         self._data[key] = value
         self._expired_info[key] = time.time() + ttl
-        logging.info(f"{self._expired_info=}")
 
     def get(self, key: str) -> Optional[Union[list, dict]]:
         if self._is_key_exists(key) and self._is_key_relevant(key):
