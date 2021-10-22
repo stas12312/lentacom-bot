@@ -1,8 +1,6 @@
 from aiogram.dispatcher.middlewares import LifetimeControllerMiddleware
-from aiogram.types.base import TelegramObject
 
 from lenta.client import LentaClient
-from tgbot.models.role import UserRole
 
 
 class LentaMiddleware(LifetimeControllerMiddleware):
