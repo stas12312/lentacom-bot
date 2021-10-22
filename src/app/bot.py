@@ -9,6 +9,7 @@ from aiogram.contrib.fsm_storage.redis import RedisStorage
 from aiogram.types import BotCommand, ParseMode
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from lenta.cache import MemoryCache
 from lenta.client import LentaClient
 from tgbot.config import load_config, COMMANDS
 from tgbot.handlers.profile import register_profile
@@ -54,7 +55,7 @@ async def main():
     bot = Bot(token=config.TG_TOKEN, parse_mode=ParseMode.MARKDOWN_V2)
     dp = Dispatcher(bot, storage=storage)
 
-    lenta_client = LentaClient()
+    lenta_client = LentaClient(cache_storage=MemoryCache())
     scheduler = AsyncIOScheduler()
 
     register_handlers(dp)
