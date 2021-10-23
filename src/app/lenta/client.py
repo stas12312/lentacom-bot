@@ -1,21 +1,17 @@
 import asyncio
 import json
-import logging
 from typing import Optional, Union
 
 import aiohttp
 
 from . import models
-from .cache import BaseCache, create_key_by_args
+from .cache.base import BaseCache, create_key_by_args
+from .consts import DAY, HOUR
 
 LENTA_BASE_URL = "https://lenta.com/api"
 FAKE_USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) " \
                   "CriOS/69.0.3497.105 Mobile/15E148 Safari/605.1"
 
-SECOND = 1
-MINUTE = SECOND * 60
-HOUR = MINUTE * 60
-DAY = HOUR * 24
 
 class LentaClient:
 
@@ -61,7 +57,7 @@ class LentaClient:
 
         # Попытка получить результат из кэша
         key = create_key_by_args(url, **data, **params)
-        result = self._get_from_cache(key)
+        result = await self._get_from_cache(key)
         if result is not None:
             return result
 
@@ -70,22 +66,22 @@ class LentaClient:
 
             # Сохранение значений в кэш при необходимости
             if ttl > 0 and method == "GET":
-                self._set_to_cache(key, result, ttl)
+                await self._set_to_cache(key, result, ttl)
             return result
 
     def build_url(self, endpoint: str) -> str:
         return f"{self._base_url}{endpoint}"
 
-    def _get_from_cache(self, key: str) -> Optional[Union[list, dict]]:
+    async def _get_from_cache(self, key: str) -> Optional[Union[list, dict]]:
         """
         Обёртка для получения значения их кэша
 
         :param key: Ключ
         :return: Значение из кэша
         """
-        return self.cache_storage.get(key) if self.cache_storage else None
+        return await self.cache_storage.get(key) if self.cache_storage else None
 
-    def _set_to_cache(self, key: str, value: str, ttl: int) -> None:
+    async def _set_to_cache(self, key: str, value: Union[list, dict, None], ttl: int) -> None:
         """
         Обёртка для установки значения в кэш
         :param key: Ключ
@@ -94,7 +90,7 @@ class LentaClient:
         :return:
         """
         if self.cache_storage:
-            self.cache_storage.set(key, value, ttl)
+            await self.cache_storage.set(key, value, ttl)
 
     async def get_cities(self) -> list[models.City]:
         """

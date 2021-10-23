@@ -14,3 +14,8 @@ SKU_STOCK_TRANSLATE = {
     SkuStock.ENOUGH: "Товара достаточно",
     SkuStock.MANY: "Товара много",
 }
+
+SECOND = 1
+MINUTE = SECOND * 60
+HOUR = MINUTE * 60
+DAY = HOUR * 24

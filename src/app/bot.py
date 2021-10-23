@@ -9,7 +9,8 @@ from aiogram.contrib.fsm_storage.redis import RedisStorage
 from aiogram.types import BotCommand, ParseMode
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from lenta.cache import MemoryCache
+from lenta.cache.memory import MemoryCache
+from lenta.cache.redis import RedisCache
 from lenta.client import LentaClient
 from tgbot.config import load_config, COMMANDS
 from tgbot.handlers.profile import register_profile
@@ -45,8 +46,10 @@ async def main():
 
     if config.TG_USE_REDIS:
         storage = RedisStorage(host=config.REDIS_HOST)
+        cache = RedisCache(host=config.REDIS_HOST)
     else:
         storage = MemoryStorage()
+        cache = MemoryCache()
 
     pool: asyncpg.Pool = await create_pool(
         config.PG_CONNECTION_STRING,
@@ -56,7 +59,7 @@ async def main():
     bot = Bot(token=config.TG_TOKEN, parse_mode=ParseMode.MARKDOWN_V2)
     dp = Dispatcher(bot, storage=storage)
 
-    lenta_client = LentaClient(cache_storage=MemoryCache())
+    lenta_client = LentaClient(cache_storage=cache)
     scheduler = AsyncIOScheduler()
 
     register_handlers(dp)
@@ -75,6 +78,7 @@ async def main():
     finally:
         await dp.storage.close()
         await dp.storage.wait_closed()
+        await cache.close()
         await bot.session.close()
 
 
