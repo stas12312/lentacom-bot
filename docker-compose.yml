@@ -17,6 +17,9 @@ services:
       - redis
   redis:
     image: redis:6.2-alpine
+    command: sh -c "redis-server --appendonly yes"
+    volumes:
+      - redis_data/:/data
   db:
     image: postgres:13.1
     healthcheck:
@@ -26,7 +29,7 @@ services:
       retries: 10
     restart: always
     ports:
-    - 127.0.0.1:5432:5432
+      - 127.0.0.1:5432:5432
     environment:
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASSWORD}
@@ -36,3 +39,4 @@ services:
 
 volumes:
   pg_data:
+  redis_data:
