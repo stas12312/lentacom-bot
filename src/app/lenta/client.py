@@ -6,7 +6,7 @@ import aiohttp
 
 from . import models
 from .cache.base import BaseCache, create_key_by_args
-from .consts import DAY, HOUR
+from .consts import DAY, HOUR, MINUTE
 
 LENTA_BASE_URL = "https://lenta.com/api"
 FAKE_USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) " \
@@ -168,7 +168,7 @@ class LentaClient:
 
         result = await self.make_request(f"/v1/stores/{store_id}/skus", params={
             "barcode": barcode,
-        })
+        }, ttl=HOUR)
         return models.BaseSku(**result)
 
     async def get_store_skus_by_ids(self, store_id: str, sku_ids: list[str]) -> list[models.BaseSku]:
@@ -181,7 +181,7 @@ class LentaClient:
         payload = {
             "skuCodes": sku_ids
         }
-        result = await self.make_request(f"/v1/stores/{store_id}/skuslist", "POST", data=payload)
+        result = await self.make_request(f"/v1/stores/{store_id}/skuslist", "POST", data=payload, ttl=MINUTE * 5)
         return [models.BaseSku(**sku) for sku in result]
 
     async def get_sku(self, store_id: str, code: str) -> models.BaseSku:
@@ -192,7 +192,7 @@ class LentaClient:
         :return: Товар
         """
 
-        result = await self.make_request(f"/v1/stores/{store_id}/skus/{code}")
+        result = await self.make_request(f"/v1/stores/{store_id}/skus/{code}", ttl=MINUTE * 5)
         return models.BaseSku(**result)
 
     async def get_catalog(self, store_id: str) -> models.Catalog:
