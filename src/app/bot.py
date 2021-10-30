@@ -9,6 +9,7 @@ from aiogram.contrib.fsm_storage.redis import RedisStorage
 from aiogram.types import BotCommand, ParseMode
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from analytics.client import AnaliyticsClient
 from lenta.cache.memory import MemoryCache
 from lenta.cache.redis import RedisCache
 from lenta.client import LentaClient
@@ -58,7 +59,12 @@ async def main():
 
     bot = Bot(token=config.TG_TOKEN, parse_mode=ParseMode.MARKDOWN_V2)
     dp = Dispatcher(bot, storage=storage)
-
+    analitycs = AnaliyticsClient(
+        config.INFLUXDB_HOST,
+        config.INFLUXDB_USER,
+        config.INFLUXDB_USER_PASSWORD,
+        config.INFLUXDB_DB,
+    )
     lenta_client = LentaClient(cache_storage=cache)
     scheduler = AsyncIOScheduler()
 
@@ -66,7 +72,7 @@ async def main():
 
     dp.middleware.setup(DbMiddleware(pool))
     dp.middleware.setup(LentaMiddleware(lenta_client))
-    dp.middleware.setup(LoggerMiddleware())
+    dp.middleware.setup(LoggerMiddleware(analitycs))
 
     await bot.set_my_commands([BotCommand(*cmd) for cmd in COMMANDS])
     # start
