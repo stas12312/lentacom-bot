@@ -6,6 +6,7 @@ from aiogram.types import Message, CallbackQuery, ContentType
 from pyzbar.pyzbar import decode
 
 from lenta.client import LentaClient
+from lenta.exeptions import LentaBaseException
 from tgbot import services
 from tgbot.callbacks.profile import add_sku_cb, delete_sku_cb
 from tgbot.keyboards import buttons
@@ -66,9 +67,9 @@ async def show_sku_info_by_photo(msg: Message, lenta: LentaClient, repo: Repo):
     if store is None:
         await msg.answer("Требуется указать магазин")
         return
-
-    sku = await lenta.get_sku_in_store_by_barcode(store.id, barcode.data.decode())
-    if not sku:
+    try:
+        sku = await lenta.get_sku_in_store_by_barcode(store.id, barcode.data.decode())
+    except LentaBaseException:
         await msg.answer("Товар не найден")
         return
 
