@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 from typing import Optional, Union
 
 import aiohttp
@@ -7,6 +8,7 @@ import aiohttp
 from . import models
 from .cache.base import BaseCache, create_key_by_args
 from .consts import DAY, HOUR, MINUTE
+from .exeptions import LentaBaseException
 
 LENTA_BASE_URL = "https://lenta.com/api"
 FAKE_USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) " \
@@ -60,9 +62,12 @@ class LentaClient:
         result = await self._get_from_cache(key)
         if result is not None:
             return result
-
+        logging.info(url)
+        logging.info(params)
         async with self._session.request(method, url, json=data, params=params) as response:
             result = await response.json()
+            if not response.ok:
+                raise LentaBaseException(message=result.get("message"), error_code=result.get("errorCode"))
 
             # Сохранение значений в кэш при необходимости
             if ttl > 0 and method == "GET":
@@ -165,7 +170,6 @@ class LentaClient:
         :param barcode:
         :return: Товар
         """
-
         result = await self.make_request(f"/v1/stores/{store_id}/skus", params={
             "barcode": barcode,
         }, ttl=HOUR)
