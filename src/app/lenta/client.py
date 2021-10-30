@@ -62,8 +62,6 @@ class LentaClient:
         result = await self._get_from_cache(key)
         if result is not None:
             return result
-        logging.info(url)
-        logging.info(params)
         async with self._session.request(method, url, json=data, params=params) as response:
             result = await response.json()
             if not response.ok:
