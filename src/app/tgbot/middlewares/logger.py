@@ -48,6 +48,8 @@ class LoggerMiddleware(BaseMiddleware):
         if not update.message and not update.callback_query:
             return
 
+        user_id = update.message.from_user.id if update.message else update.callback_query.from_user.id
+
         update_type, update_value = self._get_update_info(update)
         message = self._get_message_from_update(update)
         message_data = message.date if message else datetime.utcnow()
@@ -56,5 +58,5 @@ class LoggerMiddleware(BaseMiddleware):
             update_type, update_value,
             message_data,
             update.to_python(),
-            message.from_user.id if message else "Не определён"
+            user_id
         )
