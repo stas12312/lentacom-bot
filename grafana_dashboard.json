@@ -89,6 +89,8 @@
         "y": 0
       },
       "id": 6,
+      "interval": "1m",
+      "maxDataPoints": 50,
       "options": {
         "legend": {
           "calcs": [],
@@ -106,7 +108,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -212,6 +214,8 @@
         "y": 0
       },
       "id": 4,
+      "interval": "1m",
+      "maxDataPoints": 50,
       "options": {
         "legend": {
           "calcs": [
@@ -230,7 +234,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -332,6 +336,8 @@
         "y": 8
       },
       "id": 8,
+      "interval": "1m",
+      "maxDataPoints": 50,
       "options": {
         "legend": {
           "calcs": [
@@ -351,7 +357,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -457,6 +463,8 @@
         "y": 8
       },
       "id": 2,
+      "interval": "1m",
+      "maxDataPoints": 50,
       "options": {
         "legend": {
           "calcs": [],
@@ -474,7 +482,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -748,6 +756,8 @@
         "y": 16
       },
       "id": 11,
+      "interval": "1m",
+      "maxDataPoints": 50,
       "options": {
         "legend": {
           "calcs": [],
@@ -766,7 +776,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -832,7 +842,7 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
