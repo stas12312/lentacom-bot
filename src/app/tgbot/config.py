@@ -16,7 +16,10 @@ class Config(BaseSettings):
     PG_USER: str
     PG_DB: str
     REDIS_HOST: str
-
+    INFLUXDB_HOST: str
+    INFLUXDB_DB: str
+    INFLUXDB_USER: str
+    INFLUXDB_USER_PASSWORD: str
     PG_CONNECTION_STRING: Optional[PostgresDsn] = None
 
     @validator("PG_CONNECTION_STRING", pre=True)
