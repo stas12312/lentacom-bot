@@ -69,10 +69,11 @@ async def show_subcategory_skus(callback: CallbackQuery, repo: Repo, lenta: Lent
     user_store_id = await services.profile.get_user_store_id(repo, callback.from_user.id)
     subcategory_code = callback_data["subcategory_code"]
     skus = await services.sku.get_category_skus(lenta, user_store_id, subcategory_code)
-
-    await callback.message.edit_text(
-        services.messages.get_sku_list_message("Товары категории", skus, True)
-    )
+    if skus:
+        msg = services.messages.get_sku_list_message("Товары категории", skus, True)
+    else:
+        msg = "Товары не найдены"
+    await callback.message.edit_text(msg)
 
 
 def register_sku(dp: Dispatcher) -> None:
