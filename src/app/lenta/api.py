@@ -32,7 +32,7 @@ class ApiMethods:
     GET_CITY_STORES = "v1/cities/{city_id}/stores"
     STORE_SKUS = "v1/stores/{store_id}/skus"
     STORE_SKUS_LIST = "v1/stores/{store_id}/skusList"
-    GET_STORE_SKUS = "v1/stores/{store_id/skus/{code}"
+    GET_STORE_SKUS = "v1/stores/{store_id}/skus/{code}"
     GET_CATALOG = "v2/stores/{store_id}/catalog"
 
 
