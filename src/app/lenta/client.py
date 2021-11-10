@@ -183,6 +183,7 @@ class LentaClient:
 
         result = await self.request(
             ApiMethods.GET_STORE_SKUS.format(store_id=store_id, code=code),
+            "GET",
             cache_time=MINUTE * 5,
         )
         return models.BaseSku(**result)
