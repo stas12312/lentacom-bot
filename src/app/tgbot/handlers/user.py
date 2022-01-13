@@ -1,6 +1,8 @@
+import logging
+
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, Update
 
 from tgbot.keyboards import buttons
 from tgbot.keyboards.menu import MAIN_MENU
@@ -19,7 +21,14 @@ async def cancel(msg: Message, state: FSMContext):
     await msg.answer("Действие отменено", reply_markup=MAIN_MENU)
 
 
+async def process_exception(update: Update, exception: Exception):
+    """Обработка исключения"""
+    user_id = update.message.from_user.id if update.message else update.callback_query.from_user.id
+    await update.bot.send_message(user_id, f"Произошла ошибка, повторите действий позже")
+
+
 def register_user(dp: Dispatcher):
     dp.register_message_handler(user_start, commands=["start"], state="*")
     dp.register_message_handler(cancel, text=buttons.CANCEL, state="*")
     dp.register_message_handler(cancel, commands=["cancel"], state="*")
+    dp.register_errors_handler(process_exception)

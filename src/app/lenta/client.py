@@ -92,7 +92,7 @@ class LentaClient:
     async def search_skus_in_store(
             self, store_id: str, search_value: Optional[str] = None, limit: int = 10, offset: int = 0,
             max_price: Optional[float] = None, min_price: Optional[float] = None, sorting: Optional[str] = None,
-            only_discounts: bool = False, node_code: Optional[str] = None
+            only_discounts: bool = False, node_code: Optional[str] = None,
     ) -> list[models.BaseSku]:
         """
         Поиск товара в магазине
@@ -120,7 +120,7 @@ class LentaClient:
         result = await self.request(
             ApiMethods.STORE_SKUS.format(store_id=store_id),
             "POST",
-            json=payload
+            json=payload,
         )
         return [models.BaseSku(**sku) for sku in result["skus"]]
 
