@@ -5,7 +5,7 @@ from typing import Optional, Union
 import aiohttp
 
 from lenta.cache.base import BaseCache, create_key_by_args
-from lenta.exeptions import LentaBaseException
+from lenta.exeptions import LentaRequestError
 
 LENTA_BASE_URL = "https://lenta.com"
 FAKE_USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) " \
@@ -32,7 +32,7 @@ class ApiMethods:
     GET_CITY_STORES = "v1/cities/{city_id}/stores"
     STORE_SKUS = "v1/stores/{store_id}/skus"
     STORE_SKUS_LIST = "v1/stores/{store_id}/skusList"
-    GET_STORE_SKUS = "v1/stores/{store_id}/skus/{code}"
+    GET_STORE_SKUS = "v2/stores/{store_id}/skus/{code}"
     GET_CATALOG = "v2/stores/{store_id}/catalog"
 
 
@@ -90,7 +90,6 @@ class ApiService:
         response_from_cache = await self._cache.get(cache_key)
         if response_from_cache:
             return response_from_cache
-
         response = await self._session.request(
             method,
             url,
@@ -98,7 +97,7 @@ class ApiService:
             params=params,
         )
 
-        response_json = self.check_result(response.status, await response.text())
+        response_json = self.check_result(response, await response.text())
 
         if cache_time:
             await self._cache.set(cache_key, response_json, cache_time)
@@ -106,7 +105,8 @@ class ApiService:
         return response_json
 
     @classmethod
-    def check_result(cls, status_code: int, body: str) -> dict:
+    def check_result(cls, response: aiohttp.ClientResponse, body: str) -> dict:
+        status_code = response.status
         try:
             result_json = json_.loads(body)
         except ValueError:
@@ -120,7 +120,8 @@ class ApiService:
         else:
             message = result_json.get("message")
 
-        raise LentaBaseException(
+        raise LentaRequestError(
+            url=str(response.url),
             message=message,
             error_code=status_code,
         )
